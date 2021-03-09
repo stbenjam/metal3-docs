@@ -8,8 +8,9 @@
 # Event Subscription API
 
 Users of bare metal hardware may want to receive events from the
-baseboard management controller (BMC) in order to act on them, such as
-failed hardware, increases in temperature, and other reasons.
+baseboard management controller (BMC) in order to act on them in the
+event of a hardware fault, increase in temperature, removal of a
+device, etc.
 
 ## Status
 
@@ -27,11 +28,11 @@ for configuring events.
 ## Motivation
 
 Some environments run workloads that need to deal with potential
-failures or environmental changes quicker than they would get an alert
-from other kind of eventing software. For example, some workloads may
-have a sidecar container that knows how to deal with an alert that a
-particular network interface went down, or that the CPU temperature
-reached a certain threshold.
+faults or environmental changes quicker than they would get an alert
+through other channels. For example, some workloads may have a sidecar
+container that knows how to deal with an alert that a particular network
+interface went down, or that the CPU temperature reached a certain
+threshold.
 
 ### Goals
 
@@ -39,6 +40,7 @@ reached a certain threshold.
 
 ### Non-Goals
 
+- [Configurable events and thresholds](#configurable_events_and_thresholds)
 - Any kind of event polling
 - Software for processing the events, i.e. any webhook
 - BMC's beyond Redfish for now
@@ -56,27 +58,58 @@ reached a certain threshold.
 
 ### Implementation Details
 
-![Sketch of BMCEventSubscription API](./bmc-events.png)
+```yaml
+apiVersion: metal3.io/v1alpha1
+kind: BMCEventSubscription
+metadata:
+  name: worker-1-events
+spec:
+   hostRef: ostest-worker-1
+   targetURI: https://events.apps.corp.example.com/webhook
+   filters:
+     - StatusChange
+     - ResourceAdded
+     - Alert
+   headers:
+     X-Event-Source: "metal3.io"
+   headerRef: webhookBridgeAuth
+   context: “SomeUserContext”
+status:
+  ...
+```
 
 - A BMCEventSubscription resource represents a subscription to the events generated
   by a specific BMC.
 - Ironic will manage configuring the subscription, using a new API for managing them.
 - The BMCEventSubscription with maintain a reference to a BareMetalHost.
-- The BMCEventSubscription must have a way to inject headers, to allow for tokens,
-  basic auth, etc.
+- The BMCEventSubscription will allow injection of headers inline, or
+  using a headerRef to a secret, for example to provide basic auth
+  credentials.
 
-#### Open Questions
+### Open Questions
 
-- We'll likely need a dedicated controller, I imagine BMO is the right place?
-- What kind of RBAC do we need? States for this resource?
-- We should allow for secrets to be used for header values, to protect tokens
-  or basic auth information. What does that interface look like?
+#### Configurable events and thresholds
+
+Can we support configurable events and thresholds?
+
+Redfish standard itself does not seem to have a way to specify specific
+alerts and thresholds. For example, to receive an alert when the
+temperature exceeds 40C, one would need to configure this manually
+according to the vendor's reccomendations.
+
+Vendors, however, do provide vendor-specific ways to configure these
+thresholds, but it's hard to abstract to a neutral interface. For
+example, here is a [Dell example for temperature](https://www.dell.com/support/manuals/en-jm/idrac9-lifecycle-controller-v4.x-series/idrac9_4.00.00.00_redfishapiguide_pub/temperature?guid=guid-5a798111-407b-485d-b6fb-7d6e367d4ad4&lang=en-us).
 
 ### Risks and Mitigations
 
+#### Thundering herd
+
 Large numbers of events across large numbers of BareMetalHosts could
 generate a lot of traffic, we provide users mitigation facilities by
-allowing them to filter events to specific types.
+allowing them to filter events to specific types. Users can also control
+how much events their webhook receives by configuring the alert
+thresholds out of band.
 
 ### Dependencies
 
@@ -91,11 +124,12 @@ also consider modifying sushy-tools to support emulated eventing.
 
 ### Upgrade / Downgrade Strategy
 
-Not required
+Not required, this is a new API being introduced
 
 ## References
 
 - [Ironic Eventing API](https://storyboard.openstack.org/#!/story/2008366)
+- [Supermicro Redfish Guide](https://www.supermicro.com/manuals/other/RedfishRefGuide.pdf)
 - [DMTF: Redfish Eventing](https://www.dmtf.org/sites/default/files/Redfish%20School%20-%20Events.pdf)
 - [Redfish Event Controller (POC)](https://github.com/dhellmann/redfish-event-controller)
 - [Redfish Event Experiment (POC)](https://github.com/dhellmann/redfish-event-experiment)
