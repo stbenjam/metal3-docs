@@ -75,13 +75,17 @@ spec:
    headerRef: webhookBridgeAuth
    context: “SomeUserContext”
 status:
-  ...
+  errorMessage: ""
+  errorCount: 0
+  subscriptionID: aa618a32-9335-42bc-a04b-20ddeed13ade
 ```
 
 - A BMCEventSubscription resource represents a subscription to the events generated
   by a specific BMC.
 - Ironic will manage configuring the subscription, using a new API for managing them.
 - The BMCEventSubscription with maintain a reference to a BareMetalHost.
+- The BMCEventSubscription will maintain a reference to the ironic
+  subscription ID.
 - The BMCEventSubscription will allow injection of headers inline, or
   using a headerRef to a secret, for example to provide basic auth
   credentials.
