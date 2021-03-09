@@ -40,7 +40,7 @@ threshold.
 
 ### Non-Goals
 
-- [Configurable events and thresholds](#configurable_events_and_thresholds)
+- [Configurable events and thresholds](#configurable-events-and-thresholds)
 - Any kind of event polling
 - Software for processing the events, i.e. any webhook
 - BMC's beyond Redfish for now
@@ -49,10 +49,13 @@ threshold.
 
 ### User Stories
 
-- As a user, I'd like to configure a my BMC to send events to a target URL.
-- As a user, I'd like to filter the types of events the BMC sends to my target URL.
-- As a user, I'd like to provide context to a particular event subscription.
-- As a user, I'd like to provide arbitrary headers.
+- I'd like to configure a my BMC to send events to a target URL.
+- I'd like to filter the types of events the BMC sends to my target URL.
+- I'd like to provide context to a particular event subscription.
+- I'd like to provide arbitrary headers.
+- I'd like the baremetal-operator to reconcile on the
+  BMCEventSubscription resource, and ensure it's state is accurate in
+  Ironic.
 
 ## Design Details
 
@@ -89,21 +92,11 @@ status:
 - The BMCEventSubscription will allow injection of headers inline, or
   using a headerRef to a secret, for example to provide basic auth
   credentials.
+- The baremetal-operator binary will be expanded to include 2
+  reconcilers, with dedicated controller/reconcile loops for
+  BareMetalHost and BMCEventSubscriptions.
 
 ### Open Questions
-
-#### Configurable events and thresholds
-
-Can we support configurable events and thresholds?
-
-Redfish standard itself does not seem to have a way to specify specific
-alerts and thresholds. For example, to receive an alert when the
-temperature exceeds 40C, one would need to configure this manually
-according to the vendor's reccomendations.
-
-Vendors, however, do provide vendor-specific ways to configure these
-thresholds, but it's hard to abstract to a neutral interface. For
-example, here is a [Dell example for temperature](https://www.dell.com/support/manuals/en-jm/idrac9-lifecycle-controller-v4.x-series/idrac9_4.00.00.00_redfishapiguide_pub/temperature?guid=guid-5a798111-407b-485d-b6fb-7d6e367d4ad4&lang=en-us).
 
 ### Risks and Mitigations
 
@@ -129,6 +122,27 @@ also consider modifying sushy-tools to support emulated eventing.
 ### Upgrade / Downgrade Strategy
 
 Not required, this is a new API being introduced
+
+### Alternatives
+
+#### Configurable events and thresholds
+
+This API is for subscribing to events of a pre-defined type. In cases
+where no particular type is available, users would need to configure it
+out-of-band. For example, one may want to have a TemperatureOver40C
+alert that monitors the enclosure's temperature.
+
+The Redfish standard itself does not seem to have a way to specify
+specific alerts and thresholds. For example, to receive an alert when
+the temperature exceeds 40C, one would need to configure this manually
+according to the vendor's reccomendations.
+
+Vendors, however, do provide vendor-specific ways to configure these
+thresholds, but it's hard to abstract to a neutral interface. For
+example, here is a [Dell example for temperature](https://www.dell.com/support/manuals/en-jm/idrac9-lifecycle-controller-v4.x-series/idrac9_4.00.00.00_redfishapiguide_pub/temperature?guid=guid-5a798111-407b-485d-b6fb-7d6e367d4ad4&lang=en-us).
+
+In the short term, Ironic has no plans to abstract the various vendor
+implementations (if they exist at all).
 
 ## References
 
