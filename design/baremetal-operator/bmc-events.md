@@ -73,8 +73,6 @@ spec:
      - StatusChange
      - ResourceAdded
      - Alert
-   headers:
-     X-Event-Source: "metal3.io"
    headerRef: webhookBridgeAuth
    context: “SomeUserContext”
 status:
@@ -89,8 +87,8 @@ status:
 - The BMCEventSubscription with maintain a reference to a BareMetalHost.
 - The BMCEventSubscription will maintain a reference to the ironic
   subscription ID.
-- The BMCEventSubscription will allow injection of headers inline, or
-  using a headerRef to a secret, for example to provide basic auth
+- The BMCEventSubscription will allow injection of headers using a
+  headerRef to a secret, for example to provide basic auth
   credentials.
 - The baremetal-operator binary will be expanded to include 2
   reconcilers, with dedicated controller/reconcile loops for
