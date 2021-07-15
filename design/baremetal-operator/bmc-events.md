@@ -50,7 +50,6 @@ threshold.
 ### User Stories
 
 - I'd like to configure my BMC to send events to a target URL.
-- I'd like to filter the types of events the BMC sends to my target URL.
 - I'd like to provide context to a particular event subscription.
 - I'd like to provide arbitrary headers.
 - I'd like the baremetal-operator to reconcile on the
@@ -69,10 +68,6 @@ metadata:
 spec:
    hostRef: ostest-worker-1
    targetURI: https://events.apps.corp.example.com/webhook
-   filters:
-     - StatusChange
-     - ResourceAdded
-     - Alert
    headerRef: webhookBridgeAuth
    context: “SomeUserContext”
 status:
@@ -100,11 +95,9 @@ status:
 
 #### Thundering herd
 
-Large numbers of events across large numbers of BareMetalHosts could
-generate a lot of traffic, we provide users with mitigation facilities by
-allowing them to filter events to specific types. Users can also control
-how many events their webhook receives by configuring the alert
-thresholds out of band.
+Large numbers of events across large numbers of BareMetalHosts could generate a
+lot of traffic. Users can control how many events their webhook receives by
+configuring the alert thresholds out of band.
 
 ### Dependencies
 
