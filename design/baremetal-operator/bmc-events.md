@@ -49,12 +49,12 @@ threshold.
 
 ### User Stories
 
-- I'd like to configure a my BMC to send events to a target URL.
+- I'd like to configure my BMC to send events to a target URL.
 - I'd like to filter the types of events the BMC sends to my target URL.
 - I'd like to provide context to a particular event subscription.
 - I'd like to provide arbitrary headers.
 - I'd like the baremetal-operator to reconcile on the
-  BMCEventSubscription resource, and ensure it's state is accurate in
+  BMCEventSubscription resource, and ensure its state is accurate in
   Ironic.
 
 ## Design Details
@@ -83,15 +83,15 @@ status:
 
 - A BMCEventSubscription resource represents a subscription to the events generated
   by a specific BMC.
-- Ironic will manage configuring the subscription, using a new API for managing them.
-- The BMCEventSubscription with maintain a reference to a BareMetalHost.
-- The BMCEventSubscription will maintain a reference to the ironic
+- Ironic will manage configuring the subscription using a new API for managing them.
+- The BMCEventSubscription will maintain a reference to a BareMetalHost.
+- The BMCEventSubscription will maintain a reference to the Ironic
   subscription ID.
 - The BMCEventSubscription will allow injection of headers using a
   headerRef to a secret, for example to provide basic auth
   credentials.
 - The baremetal-operator binary will be expanded to include 2
-  reconcilers, with dedicated controller/reconcile loops for
+  reconcilers with dedicated controller/reconcile loops for
   BareMetalHost and BMCEventSubscriptions.
 
 ### Open Questions
@@ -101,9 +101,9 @@ status:
 #### Thundering herd
 
 Large numbers of events across large numbers of BareMetalHosts could
-generate a lot of traffic, we provide users mitigation facilities by
+generate a lot of traffic, we provide users with mitigation facilities by
 allowing them to filter events to specific types. Users can also control
-how much events their webhook receives by configuring the alert
+how many events their webhook receives by configuring the alert
 thresholds out of band.
 
 ### Dependencies
@@ -113,13 +113,13 @@ needs to be complete.
 
 ### Test Plan
 
-There are some existing POC code for working with Redfish Events, we
+There is some existing POC code for working with Redfish Events; we
 could build on this to implement a test framework for BMC events. We could
 also consider modifying sushy-tools to support emulated eventing.
 
 ### Upgrade / Downgrade Strategy
 
-Not required, this is a new API being introduced
+Not required as this is a new API being introduced
 
 ### Alternatives
 
