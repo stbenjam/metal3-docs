@@ -80,6 +80,8 @@ status:
   by a specific BMC.
 - Ironic will manage configuring the subscription using a new API for managing them.
 - The BMCEventSubscription will maintain a reference to a BareMetalHost.
+- The BMCEventSubscription will reside in the same namespace as the referenced
+  BareMetalHost.
 - The BMCEventSubscription will maintain a reference to the Ironic
   subscription ID.
 - The BMCEventSubscription will allow injection of headers using a
